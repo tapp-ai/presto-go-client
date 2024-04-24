@@ -115,6 +115,8 @@ const (
 	kerberosRealmConfig      = "KerberosRealm"
 	kerberosConfigPathConfig = "KerberosConfigPath"
 	SSLCertPathConfig        = "SSLCertPath"
+
+	authorizationHeader = "Authorization"
 )
 
 type sqldriver struct{}
@@ -290,6 +292,11 @@ func newConn(dsn string) (*Conn, error) {
 		if v != "" {
 			c.httpHeaders.Add(k, v)
 		}
+	}
+
+	// convert access_token to `Authorization: Bearer <jwt>`
+	if token := prestoQuery.Get("access_token"); token != "" {
+		c.httpHeaders.Add(authorizationHeader, "Bearer "+token)
 	}
 
 	return c, nil
